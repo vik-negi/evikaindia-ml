@@ -7,6 +7,9 @@ from nltk.corpus import stopwords
 from nltk.tokenize import word_tokenize, sent_tokenize
 from nltk.probability import FreqDist
 
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -58,3 +61,35 @@ def get_keywords(request):
         return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
     
     return Response({"data" : keywords},status=status.HTTP_200_OK )
+
+
+
+@api_view(["POST"])
+def get_posts_by_user_preferences(request):
+    if(request.data["posts"] == None or len(request.data["posts"]) == 0):
+        return Response({ "message" : "posts is required"},status=status.HTTP_400_BAD_REQUEST)
+    if(request.data["preferences"] == None or len(request.data["preferences"]) == 0):
+        return Response({ "message" : "preferences is required"},status=status.HTTP_400_BAD_REQUEST)
+    try:
+        posts = request.data["posts"]
+        post_descriptions = [post["description"] for post in posts]
+        preferences = request.data["preferences"]
+
+        # TF-IDF Vectorization
+        vectorizer = TfidfVectorizer(stop_words='english')
+        post_vectors = vectorizer.fit_transform(post_descriptions)
+        user_profile_vector = vectorizer.transform([" ".join(preferences)])
+
+        # Calculate Cosine Similarity
+        cosine_similarities = cosine_similarity(user_profile_vector, post_vectors).flatten()
+        print("cosine_similarities", cosine_similarities)
+        # Rank and Recommend
+        post_ranking = [(post, score) for post, score in zip(posts, cosine_similarities)]
+        post_ranking.sort(key=lambda x: x[1], reverse=True)
+
+        postList = [ post[0] for post in post_ranking]
+        print("postList", postList)
+    except:
+        return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({"data" : postList},status=status.HTTP_200_OK )
