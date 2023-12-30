@@ -46,10 +46,8 @@ def index(request):
 
 @api_view(["POST"])
 def get_keywords(request):
-    if(request.data["text"] == "" and request.data["text"] == None):
+    if(request.data["text"] == None or request.data["text"] == ""):
         return Response({ "message" : "text is required"},status=status.HTTP_400_BAD_REQUEST) 
-    if(request.data["user_id"] =="" and request.data["user_id"] != None):
-        return Response({"message" : "user_id is required"},status=status.HTTP_400_BAD_REQUEST) 
     try:
         text = request.data["text"]
         # r = Rake()
