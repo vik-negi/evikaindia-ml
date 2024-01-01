@@ -14,7 +14,24 @@ nltk.download('punkt')
 nltk.download('stopwords')
 
 
+# NLP pkgs
+import numpy as np
+import pandas as pd
+# Utils
+import joblib
+
+pipe_lr = joblib.load(open('ml/models/emotion_pipe_lr.pkl', 'rb'))
+emotions_emoji_dict = {"anger":"😠","disgust":"🤮", "fear":"😨😱", "happy":"🤗", "joy":"😂", "neutral":"😐", "sad":"😔", "sadness":"😔", "shame":"😳", "surprise":"😮"}
 # Create your views here.
+
+def predict_emotion(docx):
+    results = pipe_lr.predict([docx])
+    return results[0]
+
+def prediction_probability(docx):
+    results = pipe_lr.predict_proba([docx])
+    return results
+
 
 def extract_keywords(text, num_keywords=20):
     num_keywords = 0
@@ -93,3 +110,17 @@ def get_posts_by_user_preferences(request):
         return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
     
     return Response({"data" : postList},status=status.HTTP_200_OK )
+
+@api_view(["POST"])
+def get_emotion(request):
+    if(request.data["text"] == None or request.data["text"] == ""):
+        return Response({ "message" : "text is required"},status=status.HTTP_400_BAD_REQUEST) 
+    try:
+        text = request.data["text"]
+        emotion = predict_emotion(text)
+        probability = prediction_probability(text)
+        proba_df = pd.DataFrame(probability, columns=pipe_lr.classes_)
+    except:
+        return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
+    
+    return Response({"data" : { "emotion": emotion, "probability": probability, "probability_df" : proba_df}},status=status.HTTP_200_OK )
