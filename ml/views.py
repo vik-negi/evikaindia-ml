@@ -129,7 +129,8 @@ def get_posts_by_user_preferences(request):
 
         postList = [ post[0] for post in post_ranking]
         print("postList", postList)
-    except:
+    except Exception as e:
+        print("error ", e)
         return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
     
     return Response({"data" : postList},status=status.HTTP_200_OK )
