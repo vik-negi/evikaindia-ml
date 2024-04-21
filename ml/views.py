@@ -112,7 +112,7 @@ def get_posts_by_user_preferences(request):
         return Response({ "message" : "preferences is required"},status=status.HTTP_400_BAD_REQUEST)
     try:
         posts = request.data["posts"]
-        post_descriptions = [post["description"] for post in posts]
+        post_descriptions = posts
         preferences = request.data["preferences"]
 
         # TF-IDF Vectorization
@@ -124,16 +124,16 @@ def get_posts_by_user_preferences(request):
         cosine_similarities = cosine_similarity(user_profile_vector, post_vectors).flatten()
         print("cosine_similarities", cosine_similarities)
         # Rank and Recommend
-        post_ranking = [(post, score) for post, score in zip(posts, cosine_similarities)]
-        post_ranking.sort(key=lambda x: x[1], reverse=True)
+        # post_ranking = [(post, score) for post, score in zip(posts, cosine_similarities)]
+        # post_ranking.sort(key=lambda x: x[1], reverse=True)
 
-        postList = [ post[0] for post in post_ranking]
-        print("postList", postList)
+        # postList = [ post[0] for post in post_ranking]
+       
     except Exception as e:
         print("error ", e)
         return Response({"message": "something went wrong"},status=status.HTTP_400_BAD_REQUEST)
     
-    return Response({"data" : postList},status=status.HTTP_200_OK )
+    return Response(cosine_similarities,status=status.HTTP_200_OK )
 
 
 import json
