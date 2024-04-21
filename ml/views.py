@@ -55,7 +55,7 @@ def extract_keywords(text, num_keywords=20):
     else:
         num_keywords = 5
     print(num_keywords)
-    # Tokenize the text into sentences and words
+    # Tokenize the text into sentences and words 
     sentences = sent_tokenize(text)
     words = word_tokenize(text)
 
