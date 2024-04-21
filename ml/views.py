@@ -138,7 +138,6 @@ def get_posts_by_user_preferences(request):
 
 import json
 @csrf_exempt
-# @cors_headers()
 @api_view(["POST"])
 def get_emotion(request):
     data =  json.loads(request.body)
